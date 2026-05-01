@@ -1,7 +1,7 @@
  Team Task Manager
 
 🔗 Live Demo:
-👉 https://dileep955959.github.io/Team-Task-Manager/
+👉 
 
 
 📌 Overview
@@ -56,7 +56,7 @@ Frontend
 
  1️⃣ Clone the Repository
 
- https://github.com/dileep955959/Team-Task-Manager.git
+ 
 
  2️⃣ Open Project
 
@@ -75,7 +75,7 @@ Frontend
 🌐 Deployment
 
 The project is deployed using GitHub Pages:
-👉 https://github.com/ruchiyadav0070/Ruchi-yadav-
+👉 
 
  📈 Future Enhancements
 
