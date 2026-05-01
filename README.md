@@ -1,6 +1,6 @@
  Team Task Manager
 
-🔗 Live Demo:
+🔗 Live Demo:https://ruchiyadav0070.github.io/Ruchiy/
 👉 
 
 
@@ -75,7 +75,7 @@ Frontend
 🌐 Deployment
 
 The project is deployed using GitHub Pages:
-👉 
+👉 https://ruchiyadav0070.github.io/Ruchiy/
 
  📈 Future Enhancements
 
