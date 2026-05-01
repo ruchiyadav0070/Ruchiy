@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title> Team Task Manager</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+}
+
+body {
+  background: #0f1117;
+  color: #e4e6eb;
+}
+
+.container {
+  max-width: 900px;
+  margin: auto;
+  padding: 30px 20px;
+}
+
+h2 {
+  font-size: 26px;
+  margin-bottom: 20px;
+}
+
+h3 {
+  margin: 20px 0 10px;
+  color: #c9cbe1;
+}
+
+/* Inputs */
+input, select {
+  padding: 10px;
+  margin: 5px;
+  border-radius: 8px;
+  border: 1px solid #2a2f45;
+  background: #161b27;
+  color: white;
+}
+
+/* Buttons */
+button {
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: none;
+  background: #6c63ff;
+  color: white;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #8b84ff;
+}
+
+/* Card */
+.card {
+  background: #161b27;
+  border: 1px solid #6017ba;
+  padding: 12px;
+  margin: 10px 0;
+  border-radius: 10px;
+}
+
+/* Dashboard */
+#dashboard {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+/* Sections */
+hr {
+  border: none;
+  border-top: 1px solid #23283d;
+  margin: 20px 0;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2> Team Task Manager</h2>
+
+<!-- AUTH -->
+<div id="auth">
+  <h3>Signup / Login</h3>
+  <input id="username" placeholder="Username">
+  <input id="password" placeholder="Password">
+  <select id="role">
+    <option value="member">Member</option>
+    <option value="admin">Admin</option>
+  </select>
+  <br>
+  <button onclick="signup()">Signup</button>
+  <button onclick="login()">Login</button>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none;">
+  <h3>Welcome <span id="userInfo"></span></h3>
+  <button onclick="logout()">Logout</button>
+
+  <hr>
+
+  <!-- PROJECT -->
+  <h3>Create Project (Admin only)</h3>
+  <input id="projectName" placeholder="Project Name">
+  <button onclick="addProject()">Add Project</button>
+
+  <div id="projects"></div>
+
+  <hr>
+
+  <!-- TASK -->
+  <h3>Create Task</h3>
+  <input id="taskName" placeholder="Task Name">
+  <select id="taskStatus">
+    <option value="todo">todo</option>
+    <option value="in-progress">in-progress</option>
+    <option value="done">done</option>
+  </select>
+  <button onclick="addTask()">Add Task</button>
+
+  <div id="tasks"></div>
+
+  <hr>
+
+  <!-- DASHBOARD -->
+  <h3>Dashboard</h3>
+  <div id="dashboard"></div>
+</div>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+let currentUser = null;
+
+let users = JSON.parse(localStorage.getItem("users")) || [];
+let projects = JSON.parse(localStorage.getItem("projects")) || [];
+let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+// SIGNUP (FIXED)
+window.signup = function(){
+  let u = document.getElementById("username").value.trim();
+  let p = document.getElementById("password").value.trim();
+  let r = document.getElementById("role").value;
+
+  if(!u || !p) {
+    alert("Fill all fields");
+    return;
+  }
+
+  // duplicate check
+  let existing = users.find(x => x.u === u);
+  if(existing){
+    alert("User already exists, please login");
+    return;
+  }
+
+  const newUser = {u, p, r};
+  users.push(newUser);
+  localStorage.setItem("users", JSON.stringify(users));
+
+  // auto login
+  currentUser = newUser;
+
+  document.getElementById("auth").style.display="none";
+  document.getElementById("app").style.display="block";
+  document.getElementById("userInfo").innerText =
+    newUser.u + " ("+newUser.r+")";
+
+  alert("Signup successful!");
+
+  render();
+}
+
+// LOGIN
+window.login = function(){
+  let u = document.getElementById("username").value.trim();
+  let p = document.getElementById("password").value.trim();
+
+  let user = users.find(x => x.u===u && x.p===p);
+
+  if(!user) return alert("Invalid login");
+
+  currentUser = user;
+
+  document.getElementById("auth").style.display="none";
+  document.getElementById("app").style.display="block";
+  document.getElementById("userInfo").innerText =
+    user.u + " ("+user.r+")";
+
+  render();
+}
+
+// LOGOUT
+window.logout = function(){
+  location.reload();
+}
+
+// ADD PROJECT
+window.addProject = function(){
+  if(currentUser.r !== "admin"){
+    return alert("Only Admin can create project");
+  }
+
+  let name = document.getElementById("projectName").value.trim();
+  if(!name) return alert("Enter project name");
+
+  projects.push({name});
+  localStorage.setItem("projects", JSON.stringify(projects));
+  document.getElementById("projectName").value = "";
+
+  render();
+}
+
+// ADD TASK
+window.addTask = function(){
+  let name = document.getElementById("taskName").value.trim();
+  let status = document.getElementById("taskStatus").value;
+
+  if(!name) return alert("Enter task name");
+
+  tasks.push({name, status, user: currentUser.u});
+  localStorage.setItem("tasks", JSON.stringify(tasks));
+  document.getElementById("taskName").value = "";
+
+  render();
+}
+
+// RENDER
+function render(){
+  const projectsDiv = document.getElementById("projects");
+  const tasksDiv = document.getElementById("tasks");
+  const dashboard = document.getElementById("dashboard");
+
+  // Projects
+  projectsDiv.innerHTML = "<h4>Projects</h4>";
+  projects.forEach(p=>{
+    projectsDiv.innerHTML += `<div class="card">${p.name}</div>`;
+  });
+
+  // Tasks
+  tasksDiv.innerHTML = "<h4>Tasks</h4>";
+  tasks.forEach(t=>{
+    tasksDiv.innerHTML += `
+      <div class="card">
+        ${t.name} - <b>${t.status}</b> (${t.user})
+      </div>`;
+  });
+
+  // Dashboard
+  let total = tasks.length;
+  let done = tasks.filter(t=>t.status==="done").length;
+  let pending = tasks.filter(t=>t.status!=="done").length;
+
+  dashboard.innerHTML = `
+    <div class="card">Total Tasks<br><b>${total}</b></div>
+    <div class="card">Completed<br><b>${done}</b></div>
+    <div class="card">Pending<br><b>${pending}</b></div>
+  `;
+}
+
+});
+</script>
+
+</body>
+</html>
